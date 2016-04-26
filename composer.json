@@ -1,0 +1,26 @@
+{
+    "name": "craigzearfoss/user-ratings",
+    "description": "Add user ratings to Laravel 5.1 Eloquent models.",
+    "keywords": [
+        "php",
+        "craigzearfoss",
+        "laravel",
+        "review"
+    ],
+    "license": "MIT License",
+    "authors": [
+        {
+            "name": "Craig Zearfoss",
+            "email": "craigzearfoss@yahoo.com",
+            "homepage": "https://craigzearfoss.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.5.9",
+        "illuminate/database": "5.1.*|5.2.*"
+    },
+    "autoload": {
+        "psr-4": { "Craigzearfoss\\UserRatings\\": "src/" }
+    },
+    "minimum-stability": "dev"
+}
