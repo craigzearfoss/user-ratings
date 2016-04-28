@@ -14,6 +14,8 @@ class CreateUserRatingsTable extends Migration
     {
         Schema::create('user_ratings', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('namespace');
+            $table->integer('entity_id')->unsigned();
             $table->integer('user_id')->unsigned();
             $table->text('comment')->nullable()->default(null);
             $table->boolean('like')->default(false);
@@ -21,6 +23,8 @@ class CreateUserRatingsTable extends Migration
             $table->boolean('favorite')->default(false);
             $table->integer('rating')->nullable()->default(null);
             $table->timestamps();
+
+            $table->unique(array('namespace', 'entity_id', 'user_id'));
 
             $table->engine = 'InnoDB';
         });
