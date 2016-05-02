@@ -41,6 +41,27 @@ trait UserRatableTrait
     }
 
     /**
+     * Get the user ratings associated with the given strain.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function userRatings()
+    {
+        return $this->belongsToMany(UserRating::class)->withPivot('rating', 'like', 'dislike', 'favorite', 'comment')->withTimestamps();
+    }
+
+    /**
+     * Get a list of user rating ids associated with the current strain.
+     *
+     * @return array
+     */
+    public function getUserRatingListAttribute()
+    {
+        return $this->userRatings->lists('id');
+    }
+
+
+    /**
      * {@inheritdoc}
      */
     public function userRatings()
@@ -94,12 +115,17 @@ trait UserRatableTrait
     /**
      * {@inheritdoc}
      */
-    public function addUserRating($comment)
+    public function addUserRating($userId, $params)
     {
         $userRating = $this->createUserRatingsModel()->firstOrNew([
             'namespace' => $this->getUserRatingEntityClassName(),
             'user_ratable_id' => $this->id,
-            'comment' => $comment
+            'user_id' => $userId,
+            'rating' => isset($params['rating']) && !is_null($params['rating']) ? $params['rating'] : null,
+            'like' => isset($params['like']) && !is_null($params['like']) ? (int) $params['like'] : null,
+            'dislike' => isset($params['dislike']) && !is_null($params['dislike']) ? (int) $params['dislike'] : null,
+            'favorite' => isset($params['favorite']) && !is_null($params['favorite']) ? (int) $params['favorite'] : null,
+            'comment' => isset($params['comment']) && !empty($params['comment']) ? $params['comment'] : null,
         ]);
 
         if (! $userRating->exists) {
@@ -165,31 +191,6 @@ trait UserRatableTrait
 
         return $this->getEntityClassName();
     }
-
-    /**
-     * @param array $userRatings
-     * @return bool
-     */
-    public function syncUserRatings($newUserRatings = [])
-    {
-        // determine if any user ratings should be deleted
-        $currentUserRatings = $this->userRatings()->lists('comment', 'id')->toArray();
-        $userRatingsToDelete = array_udiff($currentUserRatings, $newUserRatings, 'strcasecmp');
-        $newUserRatings = array_udiff($newUserRatings, $currentUserRatings, 'strcasecmp');
-
-        // add the new user ratings
-        foreach ($newUserRatings as $comment) {
-            $this->addUserRating($comment);
-        }
-
-        // delete old user ratings
-        foreach ($userRatingsToDelete as $comment) {
-            $this->deleteUserRating($comment);
-        }
-
-        return true;
-    }
-
 
     /**
      * {@inheritdoc}
