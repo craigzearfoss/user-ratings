@@ -56,7 +56,7 @@ interface UserRatableInterface
     public static function createUserRatingsModel();
 
     /**
-     * #@param integer $userId
+     * @param integer $userId
      * @return bool
      */
     public function deleteUserRating($userId);
