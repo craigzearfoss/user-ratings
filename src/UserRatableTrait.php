@@ -41,27 +41,6 @@ trait UserRatableTrait
     }
 
     /**
-     * Get the user ratings associated with the given strain.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function userRatings()
-    {
-        return $this->belongsToMany(UserRating::class)->withPivot('rating', 'like', 'dislike', 'favorite', 'comment')->withTimestamps();
-    }
-
-    /**
-     * Get a list of user rating ids associated with the current strain.
-     *
-     * @return array
-     */
-    public function getUserRatingListAttribute()
-    {
-        return $this->userRatings->lists('id');
-    }
-
-
-    /**
      * {@inheritdoc}
      */
     public function userRatings()
@@ -69,7 +48,7 @@ trait UserRatableTrait
         $instance = new static;
         return $instance->createUserRatingsModel()
             ->whereNamespace($instance->getUserRatingEntityClassName())
-            ->where('user_ratable_id', $this->id);
+            ->where('entity_id', $this->id);
     }
 
     /**
@@ -86,40 +65,11 @@ trait UserRatableTrait
     /**
      * {@inheritdoc}
      */
-    public function setUserRatings($userRatings, $type = 'comment')
-    {
-        // Get the current entity user ratings
-        $entityUserRatings = $this->userRatings->lists($type)->all();
-
-        // Prepare the user ratings to be added and removed
-        $userRatingsToAdd = array_diff($userRatings, $entityUserRatings);
-        $userRatingsToDelete = array_diff($entityUserRatings, $userRatings);
-
-        // Delete the user ratings
-        if (!empty($userRatingsToDelete)) {
-            foreach($userRatingsToDelete as $comment) {
-                $this->deleteUserRating($comment);
-            }
-        }
-
-        // Add the user ratings
-        if (!empty($userRatingsToAdd)) {
-            foreach ($userRatingsToAdd as $comment) {
-                $this->addUserRating($comment);
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function addUserRating($userId, $params)
     {
         $userRating = $this->createUserRatingsModel()->firstOrNew([
             'namespace' => $this->getUserRatingEntityClassName(),
-            'user_ratable_id' => $this->id,
+            'entity_id' => $this->id,
             'user_id' => $userId,
             'rating' => isset($params['rating']) && !is_null($params['rating']) ? $params['rating'] : null,
             'like' => isset($params['like']) && !is_null($params['like']) ? (int) $params['like'] : null,
@@ -128,46 +78,7 @@ trait UserRatableTrait
             'comment' => isset($params['comment']) && !empty($params['comment']) ? $params['comment'] : null,
         ]);
 
-        if (! $userRating->exists) {
-
-            // increment sequence
-            $maxSequence = $this->createUserRatingsModel()
-                ->whereNamespace($this->getUserRatingEntityClassName())
-                ->where(function ($query) {
-                    $query
-                        ->Where('user_ratable_id', $this->id)
-                    ;
-                })
-                ->max('sequence');
-            $userRating->sequence = $maxSequence + 1;
-
-            $userRating->save();
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function removeUserRating($name)
-    {
-        $namespace = $this->getUserRatingEntityClassName();
-
-        $userRating = $this
-            ->createUserRatingsModel()
-            ->whereNamespace($namespace)
-            ->where(function ($query) use ($name) {
-                $query
-                    ->orWhere('comment', $name)
-                ;
-            })
-            ->first()
-        ;
-
-        if ($userRating) {
-            $userRating->update(['count' => $userRating->count - 1]);
-
-            $this->userRatings()->detach($userRating);
-        }
+        return $userRating;
     }
 
     /**
@@ -179,8 +90,6 @@ trait UserRatableTrait
     }
 
     /**
-     * Returns the entity class name.
-     *
      * @return string
      */
     protected function getUserRatingEntityClassName()
@@ -195,12 +104,12 @@ trait UserRatableTrait
     /**
      * {@inheritdoc}
      */
-    public function deleteUserRating($comment)
+    public function deleteUserRating($userId)
     {
         $userRating = $this->createUserRatingsModel()->firstOrNew([
             'namespace' => $this->getUserRatingEntityClassName(),
-            'user_ratable_id' => $this->id,
-            'comment' => $comment
+            'entity_id' => $this->id,
+            'user_id' => $userId
         ]);
 
         if ($userRating->exists) {

@@ -40,37 +40,13 @@ interface UserRatableInterface
     public static function allUserRatings();
 
     /**
-     * Attaches multiple user ratings to the entity.
-     *
-     * @param  string|array  $userRatings
-     * @return bool
-     */
-    public function userRating($userRatings);
-
-    /**
-     * Attaches or detaches the given user ratings.
-     *
-     * @param  string|array  $userRatings
-     * @param  string  $type
-     * @return bool
-     */
-    public function setUserRatings($userRatings, $type = 'comment');
-
-    /**
      * Attaches the given user rating to the entity.
      *
-     * @param  string  $comment
+     * @param  integer $userId
+     * @param  array   $params
      * @return void
      */
-    public function addUserRating($comment);
-
-    /**
-     * Detaches the given user rating from the entity.
-     *
-     * @param  string  $comment
-     * @return void
-     */
-    public function removeUserRating($comment);
+    public function addUserRating($userId, $params);
 
     /**
      * Creates a new model instance.
@@ -80,8 +56,8 @@ interface UserRatableInterface
     public static function createUserRatingsModel();
 
     /**
-     * @param array $newUserRatings
+     * #@param integer $userId
      * @return bool
      */
-    public function syncUserRatings($newUserRatings = []);
+    public function deleteUserRating($userId);
 }

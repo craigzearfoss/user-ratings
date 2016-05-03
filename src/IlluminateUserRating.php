@@ -32,10 +32,14 @@ class IlluminateUserRating extends Model
      * {@inheritdoc}
      */
     protected $fillable = [
-        'namespace',
-        'user_ratable_id',
+        'entity_id',
         'comment',
-        'sequence'
+        'dislike',
+        'favorite',
+        'like',
+        'namespace',
+        'rating',
+        'user_id'
     ];
 
     /**
@@ -49,14 +53,14 @@ class IlluminateUserRating extends Model
     }
 
     /**
-     * Finds a user rating by its comment.
+     * Finds a user rating by it's user id.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param  string  $comment
+     * @param  integer  $userId
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeComment(Builder $query, $comment)
+    public function scopeUserId(Builder $query, $userId)
     {
-        return $query->whereName($comment);
+        return $query->whereUserId($userId);
     }
 }
