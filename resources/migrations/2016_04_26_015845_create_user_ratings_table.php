@@ -21,7 +21,7 @@ class CreateUserRatingsTable extends Migration
             $table->boolean('like')->default(false);
             $table->boolean('dislike')->default(false);
             $table->boolean('favorite')->default(false);
-            $table->integer('rating')->nullable()->default(null);
+            $table->float('rating')->nullable()->default(null);
             $table->timestamps();
 
             $table->unique(array('namespace', 'entity_id', 'user_id'));
