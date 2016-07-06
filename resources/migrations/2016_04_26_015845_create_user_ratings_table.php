@@ -21,10 +21,15 @@ class CreateUserRatingsTable extends Migration
             $table->boolean('like')->default(false);
             $table->boolean('dislike')->default(false);
             $table->boolean('favorite')->default(false);
-            $table->float('rating')->nullable()->default(null);
+            $table->float('score')->nullable()->default(null);
             $table->timestamps();
 
             $table->unique(array('namespace', 'entity_id', 'user_id'));
+
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users')
+                ->onDelete('restrict');
 
             $table->engine = 'InnoDB';
         });

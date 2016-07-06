@@ -13,7 +13,9 @@ class UserRatingsServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        $this->publishes([
+            realpath(__DIR__.'/../resources/migrations') => database_path('migrations'),
+        ], 'migrations');
     }
 
     /**
